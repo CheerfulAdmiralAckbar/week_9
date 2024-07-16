@@ -16,11 +16,10 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
   try {
-    const user = User.findOne({ where: { username } });
-
-    if (user.password !== req.body.password) {
-    }
-  } catch (error) {}
+    res.status(201).json({ message: "success", body: req.user });
+  } catch (error) {
+    res.status(400).json({ message: error.message, error: error });
+  }
 };
 
 module.exports = {

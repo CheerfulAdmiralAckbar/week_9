@@ -6,8 +6,11 @@ const {
   isValidEmail,
   isValidPassword,
 } = require("../middleware/validation");
+
+const { hashPass, comparePass } = require("../middleware/auth");
+
 const { register, login } = require("./controllers");
 
-userRouter.post("/register", isData, isValidEmail, register);
-userRouter.post("/login", login);
+userRouter.post("/register", hashPass, register);
+userRouter.post("/login", comparePass, login);
 module.exports = userRouter;
