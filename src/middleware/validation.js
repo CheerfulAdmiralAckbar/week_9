@@ -65,8 +65,34 @@ const isValidEmail = async (req, res, next) => {
   }
 };
 
+const isValidUser = async (req, res, next) => {
+  const username = req.body.username.toLowerCase();
+  try {
+    if (!req.body.username || !req.body.password) {
+      res.status(422).json({ message: "Username or password not entered" });
+      return;
+    }
+
+    const user = User.findOne({ where: { username } });
+
+    if (!user) {
+      res.status(404).json({ message: "User not found" });
+    }
+
+    if (user.password !== req.body.password) {
+      res.status(403).json({ message: "Incorrect user details " });
+    }
+
+    req.user = user;
+    next();
+  } catch (error) {
+    res.json({ error: error, message: error.message });
+  }
+};
+
 module.exports = {
   isData,
   isLowerCase,
   isValidEmail,
+  isValidUser,
 };
