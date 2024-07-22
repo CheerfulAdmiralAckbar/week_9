@@ -1,6 +1,8 @@
 const bcrypt = require("bcrypt");
 const saltRounds = parseInt(process.env.SALT_ROUNDS);
 
+const jwt = require("jsonwebtoken");
+
 const User = require("../users/model");
 
 const hashPass = async (req, res, next) => {
@@ -38,7 +40,9 @@ const comparePass = async (req, res, next) => {
     console.log(`Password Compare: ${JSON.stringify(passwordCompare)}`);
 
     if (!passwordCompare) {
-      return res.status(404).json({ message: "Password is incorrect" });
+      return res
+        .status(404)
+        .json({ message: "error", error: "Password is incorrect" });
     }
 
     req.user = user;
@@ -48,7 +52,32 @@ const comparePass = async (req, res, next) => {
   }
 };
 
+const verifyToken = (req, res, next) => {
+  const token = req.headers.token;
+
+  if (!token) {
+    return res.status(403).json({ message: "No token provided" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.authCheck = decoded;
+    next();
+  } catch (error) {
+    res.status(401).json({ message: "Invalid token" });
+  }
+};
+
+const checkRole = (role) => (req, res, next) => {
+  if (req.authCheck.role !== role) {
+    return res.status(403).json({ message: "Access denied" });
+  }
+  next();
+};
+
 module.exports = {
   hashPass,
   comparePass,
+  verifyToken,
+  checkRole,
 };
